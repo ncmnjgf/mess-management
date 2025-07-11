@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Mess Dashboard</title>
+  <!-- 🔐 Redirect if not logged in -->
+  <script>
+    if (localStorage.getItem("isLoggedIn") !== "true") {
+      window.location.href = "adminlogin.html";
+    }
+  </script>
+  <link rel="stylesheet" href="style.css" />
+  <script defer src="script.js"></script>
+</head>
+<body>
+  <div class="container">
+    <h1>Mess Management</h1>
+    
+    <div class="dashboard">
+      <div class="card">
+        <h3 id="totalStudents">0</h3>
+        <p>Total Students</p>
+      </div>
+      <div class="card">
+        <h3 id="totalPaid">₹0</h3>
+        <p>Total Paid</p>
+      </div>
+      <div class="card">
+        <h3 id="totalPending">₹0</h3>
+        <p>Total Pending</p>
+      </div>
+      <div class="card">
+        <h3 id="currentMonth">₹0</h3>
+        <p>Current Month</p>
+      </div>
+    </div>
+
+    <div class="buttons">
+      <button id="addStudentBtn" onclick="openAddModal()">Add Student</button>
+      <button id="generateReportBtn" onclick="exportToExcel()">Generate Excel File</button>
+    </div>
+
+    <h2>Students Management</h2>
+    <input type="text" id="searchInput" placeholder="Search students..." oninput="searchStudent()" />
+
+    <table>
+      <thead>
+        <tr>
+          <th>Student ID</th>
+          <th>Name</th>
+          <th>Contact</th>
+          <th>Monthly Fee</th>
+          <th>Status</th>
+          <th>Last Payment</th>
+        </tr>
+      </thead>
+      <tbody id="studentTableBody">
+        <!-- Dynamic data from JS -->
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ✅ Add Student Modal -->
+  <div id="addStudentModal" class="modal hidden">
+    <div class="modal-content">
+      <h3>Add New Student</h3>
+      <form id="addStudentForm" onsubmit="addStudent(); return false;">
+        <input type="text" id="studentName" placeholder="Name" required />
+        <input type="text" id="studentContact" placeholder="Contact Number" required pattern="[0-9]{10}" />
+        <input type="number" id="studentFee" placeholder="Monthly Fee" required min="0" />
+        <input type="month" id="studentLastPayment" required />
+        <select id="studentStatus" required>
+          <option value="Pending">Pending</option>
+          <option value="Paid">Paid</option>
+        </select>
+        <button type="submit">Add Student</button>
+        <button type="button" onclick="closeAddModal()">Cancel</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ✅ Record Payment Modal (Optional — structure only for now) -->
+  <div id="paymentModal" class="modal hidden">
+    <div class="modal-content">
+      <h3>Record Payment</h3>
+      <form id="recordPaymentForm" onsubmit="recordPayment(); return false;">
+        <select id="paymentStudent" required></select>
+        <input type="number" id="paymentAmount" placeholder="Amount" required />
+        <input type="month" id="paymentMonth" required />
+        <select id="paymentMethod" required>
+          <option value="">Select Method</option>
+          <option value="Cash">Cash</option>
+          <option value="UPI">UPI</option>
+          <option value="Card">Card</option>
+        </select>
+        <input type="date" id="paymentDate" required />
+        <button type="submit">Record</button>
+        <button type="button" onclick="closePaymentModal()">Cancel</button>
+      </form>
+    </div>
+  </div>
+  <!-- Record Payment Modal -->
+<!-- ✅ Record Payment Modal -->
+<div id="paymentModal" class="modal hidden">
+  <div class="modal-content">
+    <h3>Record Payment</h3>
+    <form id="recordPaymentForm" onsubmit="recordPayment(); return false;">
+      <select id="paymentStudent" required>
+        <option value="">Select Student</option>
+        <!-- JS will populate student options -->
+      </select>
+      <input type="number" id="paymentAmount" placeholder="Amount" required min="1" />
+      <input type="month" id="paymentMonth" required />
+      <select id="paymentMethod" required>
+        <option value="">Select Method</option>
+        <option value="Cash">Cash</option>
+        <option value="UPI">UPI</option>
+        <option value="Card">Card</option>
+      </select>
+      <input type="date" id="paymentDate" required />
+      <button type="submit">Record</button>
+      <button type="button" onclick="closePaymentModal()">Cancel</button>
+    </form>
+  </div>
+</div>
+<!-- View Payment Section -->
+<div id="viewPaymentSection" class="hidden">
+  <h2>Enrolled Students</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th><th>Name</th><th>Contact</th><th>Monthly Fee</th><th>Status</th><th>Last Payment</th><th>Actions</th>
+      </tr>
+    </thead>
+    <tbody id="viewPaymentTableBody"></tbody>
+  </table>
+
+  <!-- Student Detail Modal (for payment & profile) -->
+  <div id="studentDetailModal" class="modal hidden">
+    <div class="modal-content">
+      <h3 id="detailName"></h3>
+      <img id="detailPhoto" src="https://via.placeholder.com/150?text=No+Photo" alt="Profile Photo" width="150" height="150" />
+      <br />
+      <input type="file" id="detailPhotoUpload" accept="image/*" onchange="handleDetailPhotoUpload(event)" />
+      
+      <h4>Payment History</h4>
+      <table>
+        <thead><tr><th>Month</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead>
+        <tbody id="detailPaymentHistory"></tbody>
+      </table>
+
+      <button onclick="closeStudentDetailModal()">Close</button>
+    </div>
+  </div>
+
+  <button onclick="closeViewPaymentSection()">Close View Payment</button>
+</div>
+
+<!-- Put this button with your main controls (outside viewPaymentSection) -->
+<button onclick="openViewPayment()">View Payment</button>
+</body>
+<script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+
+</html>
